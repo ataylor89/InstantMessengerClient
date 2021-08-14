@@ -21,6 +21,7 @@ public class Client {
     private PrintWriter networkOut;
     private KeyboardAdapter keyboardAdapter;
     private InstantMessengerGUI gui;
+    private String username;
     
     public Client(String hostname, int port) {
         this.hostname = hostname;
@@ -52,8 +53,10 @@ public class Client {
                 
                 while (socket.isConnected()) {
                     String line = networkIn.readLine();
-                    System.out.println(line);
-                    gui.display(line + "\n");
+                    if (line != null) {
+                        System.out.println(line);
+                        gui.display(line + "\n");
+                    }
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,6 +86,18 @@ public class Client {
     public void send(String message) {
         if (socket.isConnected())
             networkOut.println(message);
+        
+        if (message.startsWith("NICK")) {
+            this.username = message.split(" ")[1];
+        }
+        
+        if (message.startsWith("/register")) {
+            this.username = message.split(" ")[1];
+        }
+    }
+    
+    public String getUserName() {
+        return username;
     }
     
     public static void main(String[] args) {
