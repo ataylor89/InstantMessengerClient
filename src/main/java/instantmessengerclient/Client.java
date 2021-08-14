@@ -25,7 +25,11 @@ public class Client {
     public Client(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
-        keyboardAdapter = new KeyboardAdapter(this);
+    }
+    
+    public Client() { 
+        this.hostname = "127.0.0.1";
+        this.port = 8200;
     }
     
     public void connect(String hostname, int port) {
@@ -67,6 +71,7 @@ public class Client {
     }
    
     public void startKeyboardAdapter() {
+        keyboardAdapter = new KeyboardAdapter(this);
         keyboardAdapter.start();
     }
     
@@ -76,7 +81,8 @@ public class Client {
     }
        
     public void send(String message) {
-        networkOut.println(message);
+        if (socket.isConnected())
+            networkOut.println(message);
     }
     
     public static void main(String[] args) {
