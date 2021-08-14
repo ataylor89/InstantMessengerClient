@@ -28,24 +28,39 @@ public class Client {
         keyboardAdapter = new KeyboardAdapter(this);
     }
     
+    public void connect(String hostname, int port) {
+        this.hostname = hostname;
+        this.port = port;
+        connect();
+    }
+    
     public void connect() {
         try {
             socket = new Socket(hostname, port);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+            
+        Thread listener = new Thread(() -> {
+            try {
+                networkIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                networkOut = new PrintWriter(socket.getOutputStream(), true);
+                
+                while (socket.isConnected()) {
+                    String line = networkIn.readLine();
+                    System.out.println(line);
+                    gui.display(line + "\n");
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        listener.start();
     }
     
-    public void listen() {    
+    public void disconnect() {
         try {
-            networkIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            networkOut = new PrintWriter(socket.getOutputStream(), true);
-            
-            while (socket.isConnected()) {
-                String line = networkIn.readLine();
-                System.out.println(line);
-                gui.display(line + "\n");
-            }
+            socket.close();
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,9 +81,7 @@ public class Client {
     
     public static void main(String[] args) {
         Client client = new Client("127.0.0.1", 8200);
-        client.connect();
         client.startKeyboardAdapter();
-        client.openGUI();
-        client.listen();        
+        client.openGUI();    
     }
 }
