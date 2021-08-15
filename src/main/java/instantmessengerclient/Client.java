@@ -22,6 +22,7 @@ public class Client {
     private KeyboardAdapter keyboardAdapter;
     private InstantMessengerGUI gui;
     private String username;
+    private String protocol;
     
     public Client(String hostname, int port) {
         this.hostname = hostname;
@@ -29,13 +30,13 @@ public class Client {
     }
     
     public Client() { 
-        this.hostname = "127.0.0.1";
-        this.port = 8200;
+        this("127.0.0.1", 8200);
     }
     
-    public void connect(String hostname, int port) {
+    public void connect(String hostname, int port, String protocol) {
         this.hostname = hostname;
         this.port = port;
+        this.protocol = protocol;
         connect();
     }
     
@@ -87,6 +88,10 @@ public class Client {
         if (socket.isConnected())
             networkOut.println(message);
         
+        if (message.startsWith("USER")) {
+            this.username = message.split(" ")[1];
+        }
+        
         if (message.startsWith("NICK")) {
             this.username = message.split(" ")[1];
         }
@@ -98,6 +103,10 @@ public class Client {
     
     public String getUserName() {
         return username;
+    }
+    
+    public String getProtocol() {
+        return protocol;
     }
     
     public static void main(String[] args) {

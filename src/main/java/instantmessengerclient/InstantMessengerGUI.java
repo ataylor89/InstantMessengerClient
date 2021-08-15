@@ -1,13 +1,9 @@
 package instantmessengerclient;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +17,6 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
 
     private Client client;
     private JFileChooser fileChooser;
-    private boolean serverEchoesToThisClient = true;
     
     /**
      * Creates new form InstantMessengerGUI
@@ -33,7 +28,12 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
     }
     
     public void display(String message) {
-        chatWindow.append(message);
+        if (message.startsWith("PRIVMSG")) {
+            chatWindow.append(client.getUserName() + ": " + message.split(" ")[2]);
+        }
+        else {
+            chatWindow.append(message);
+        }
     }
 
     /**
@@ -52,18 +52,16 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
         portTextField = new javax.swing.JTextField();
         connectDialogMessage = new javax.swing.JLabel();
         connectButton = new javax.swing.JButton();
+        protocolLabel = new javax.swing.JLabel();
+        protocolTextField = new javax.swing.JTextField();
         optionsDialog = new javax.swing.JDialog();
-        jLabel1 = new javax.swing.JLabel();
-        serverEchoYesRadioButton = new javax.swing.JRadioButton();
-        serverEchoOtherRadioButton = new javax.swing.JRadioButton();
-        optionsSaveButton = new javax.swing.JButton();
         userInputTextPane = new javax.swing.JScrollPane();
         userInputTextArea = new javax.swing.JTextArea();
         sendButton = new javax.swing.JButton();
         chatWindowScrollPane = new javax.swing.JScrollPane();
         chatWindow = new javax.swing.JTextArea();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        menuBar = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
         optionsMenuItem = new javax.swing.JMenuItem();
         saveMenuItem = new javax.swing.JMenuItem();
         openMenuItem = new javax.swing.JMenuItem();
@@ -71,13 +69,15 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
         exitMenuItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
-        connectDialog.setMinimumSize(new java.awt.Dimension(500, 500));
+        connectDialog.setBounds(new java.awt.Rectangle(0, 0, 451, 331));
+        connectDialog.setMinimumSize(new java.awt.Dimension(451, 331));
+        connectDialog.setSize(new java.awt.Dimension(451, 331));
 
         hostnameLabel.setText("Hostname:");
 
         portLabel.setText("Port:");
 
-        connectDialogMessage.setText("Please enter a hostname and a port");
+        connectDialogMessage.setText("Please enter a hostname, port and protocol");
 
         connectButton.setText("Connect");
         connectButton.addActionListener(new java.awt.event.ActionListener() {
@@ -85,6 +85,8 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 connectButtonActionPerformed(evt);
             }
         });
+
+        protocolLabel.setText("Protocol:");
 
         javax.swing.GroupLayout connectDialogLayout = new javax.swing.GroupLayout(connectDialog.getContentPane());
         connectDialog.getContentPane().setLayout(connectDialogLayout);
@@ -99,15 +101,17 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                             .addGroup(connectDialogLayout.createSequentialGroup()
                                 .addGroup(connectDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(hostnameLabel)
-                                    .addComponent(portLabel))
+                                    .addComponent(portLabel)
+                                    .addComponent(protocolLabel))
                                 .addGap(34, 34, 34)
                                 .addGroup(connectDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(hostnameTextField)
-                                    .addComponent(portTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)))))
+                                    .addComponent(portTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                                    .addComponent(protocolTextField)))))
                     .addGroup(connectDialogLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
+                        .addGap(19, 19, 19)
                         .addComponent(connectButton)))
-                .addContainerGap(203, Short.MAX_VALUE))
+                .addContainerGap(153, Short.MAX_VALUE))
         );
         connectDialogLayout.setVerticalGroup(
             connectDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -122,52 +126,24 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 .addGroup(connectDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(portLabel)
                     .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(34, 34, 34)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
+                .addGroup(connectDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(protocolLabel)
+                    .addComponent(protocolTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(33, 33, 33)
                 .addComponent(connectButton)
-                .addContainerGap(110, Short.MAX_VALUE))
+                .addGap(30, 30, 30))
         );
-
-        jLabel1.setText("Does the server echo chat messages to this client?");
-
-        serverEchoYesRadioButton.setSelected(true);
-        serverEchoYesRadioButton.setText("Yes");
-
-        serverEchoOtherRadioButton.setText("Only to other clients");
-
-        optionsSaveButton.setText("Save");
-        optionsSaveButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                optionsSaveButtonActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout optionsDialogLayout = new javax.swing.GroupLayout(optionsDialog.getContentPane());
         optionsDialog.getContentPane().setLayout(optionsDialogLayout);
         optionsDialogLayout.setHorizontalGroup(
             optionsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(optionsDialogLayout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addGroup(optionsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(optionsSaveButton)
-                    .addGroup(optionsDialogLayout.createSequentialGroup()
-                        .addComponent(serverEchoYesRadioButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(serverEchoOtherRadioButton))
-                    .addComponent(jLabel1))
-                .addContainerGap(66, Short.MAX_VALUE))
+            .addGap(0, 400, Short.MAX_VALUE)
         );
         optionsDialogLayout.setVerticalGroup(
             optionsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(optionsDialogLayout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addGroup(optionsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(serverEchoYesRadioButton)
-                    .addComponent(serverEchoOtherRadioButton))
-                .addGap(31, 31, 31)
-                .addComponent(optionsSaveButton)
-                .addContainerGap(159, Short.MAX_VALUE))
+            .addGap(0, 300, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -189,7 +165,7 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
         chatWindow.setRows(5);
         chatWindowScrollPane.setViewportView(chatWindow);
 
-        jMenu1.setText("File");
+        fileMenu.setText("File");
 
         optionsMenuItem.setText("Options");
         optionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -197,7 +173,7 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 optionsMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(optionsMenuItem);
+        fileMenu.add(optionsMenuItem);
 
         saveMenuItem.setText("Save");
         saveMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -205,7 +181,7 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 saveMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(saveMenuItem);
+        fileMenu.add(saveMenuItem);
 
         openMenuItem.setText("Open");
         openMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -213,7 +189,7 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 openMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(openMenuItem);
+        fileMenu.add(openMenuItem);
 
         connectMenuItem.setText("Connect");
         connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -221,17 +197,17 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
                 connectMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(connectMenuItem);
+        fileMenu.add(connectMenuItem);
 
         exitMenuItem.setText("Exit");
-        jMenu1.add(exitMenuItem);
+        fileMenu.add(exitMenuItem);
 
-        jMenuBar1.add(jMenu1);
+        menuBar.add(fileMenu);
 
         jMenu2.setText("Edit");
-        jMenuBar1.add(jMenu2);
+        menuBar.add(jMenu2);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(menuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -264,8 +240,8 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
         String message = userInputTextArea.getText();
         client.send(message);
         userInputTextArea.setText("");
-        if (!serverEchoesToThisClient)
-            chatWindow.append(message + "\n");
+        if (client.getProtocol().equals("IRC"))
+            display(message + "\n");
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
@@ -305,14 +281,10 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         String hostname = hostnameTextField.getText();
         int port = Integer.parseInt(portTextField.getText());
+        String protocol = protocolTextField.getText();
         connectDialog.setVisible(false);
-        client.connect(hostname, port);
+        client.connect(hostname, port, protocol);
     }//GEN-LAST:event_connectButtonActionPerformed
-
-    private void optionsSaveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optionsSaveButtonActionPerformed
-        serverEchoesToThisClient = serverEchoYesRadioButton.isSelected();
-        optionsDialog.setVisible(false);
-    }//GEN-LAST:event_optionsSaveButtonActionPerformed
 
     private void optionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optionsMenuItemActionPerformed
         optionsDialog.setVisible(true);
@@ -361,23 +333,21 @@ public class InstantMessengerGUI extends javax.swing.JFrame {
     private javax.swing.JLabel connectDialogMessage;
     private javax.swing.JMenuItem connectMenuItem;
     private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenu fileMenu;
     private javax.swing.JLabel hostnameLabel;
     private javax.swing.JTextField hostnameTextField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JDialog optionsDialog;
     private javax.swing.JMenuItem optionsMenuItem;
-    private javax.swing.JButton optionsSaveButton;
     private javax.swing.JLabel portLabel;
     private javax.swing.JTextField portTextField;
+    private javax.swing.JLabel protocolLabel;
+    private javax.swing.JTextField protocolTextField;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JButton sendButton;
-    private javax.swing.JRadioButton serverEchoOtherRadioButton;
-    private javax.swing.JRadioButton serverEchoYesRadioButton;
     private javax.swing.JTextArea userInputTextArea;
     private javax.swing.JScrollPane userInputTextPane;
     // End of variables declaration//GEN-END:variables
